@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0-windows10.0.17763.0</TargetFramework>
+    <!-- Allows compiling this Windows-targeted executable on Linux/macOS build hosts -->
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <!-- Support older Windows versions -->
+    <SupportedOSPlatformVersion>7.0</SupportedOSPlatformVersion>
+    <Description>WindowsModulesLoader for Duplicati</Description>
+    <AssemblyName>Duplicati.WindowsModulesLoader</AssemblyName>
+    <Copyright>Copyright © 2026 Team Duplicati, MIT license</Copyright>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Duplicati\Library\WindowsModules\Duplicati.Library.WindowsModules.csproj" />
+    <ProjectReference Include="..\..\Duplicati\Library\Snapshots\Duplicati.Library.Snapshots.csproj" />
+  </ItemGroup>
+
+  <!--
+    Vanara.PInvoke.VssApi ships the native ijwhost.dll inside its "lib" folder, so NuGet
+    offers it as a managed reference and the assembly resolver reports that it holds no
+    metadata (MSB3246). It reaches this project through Duplicati.Library.WindowsModules,
+    which drops it the same way and takes the copy from the targeting pack instead.
+  -->
+  <Target Name="DropVanaraIjwhostReference" BeforeTargets="ResolveAssemblyReferences">
+    <ItemGroup>
+      <_VanaraIjwhost Include="@(Reference)" Condition="'%(Filename)' == 'Ijwhost'" />
+      <Reference Remove="@(_VanaraIjwhost)" />
+    </ItemGroup>
+  </Target>
+
+</Project>
